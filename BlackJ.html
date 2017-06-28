@@ -1,0 +1,137 @@
+﻿<meta charset="utf-8">
+<script>
+
+function getRandomInt(min, max){
+	//ddddd
+	return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function getCard() {
+	var cards = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+	return cards[getRandomInt(0,cards.length -1)];
+}
+
+function getSum(arr) {
+	var sum=0;
+	for (var i = 0; i<arr.length; i++) { //подсчет суммы без тузов
+		if (arr[i] != 'A'){
+			if((arr[i] == 'J') || (arr[i] == 'Q') || (arr[i] == 'K')) {
+				sum = sum + 10;
+			} else {
+				sum = sum + parseInt(arr[i]);
+			}
+		}
+	}
+	for (var i = 0; i<arr.length; i++) { //проверка тузов отдельно от всех, т.к. их значение меняется с новыми картами
+		if (arr[i] == 'A') {
+			if (sum > 10){
+				sum = sum + 1;
+			} else {
+				sum = sum + 11;
+			}
+		}
+	}
+	return sum;
+}
+
+function getStatus() {
+	//ddd
+	return "Dealer: " + dealer.join(' ') + " player: " + player.join(' ');
+}
+
+function getMoney(stav, out){
+	if (out == 'win'){
+		budget = budget + stav;
+		budgetArr.push(budget);
+	} else if (out == 'lose'){
+		budget = budget - stav;
+		budgetArr.push(budget);
+	}
+	return "Your budget: " + budget; 
+}
+
+do { // vvod kol-va igr
+	var games = parseInt(prompt("Skolko igr?"));
+	if (isNaN(games)) {
+		alert("Vvedite chislo mejdu 0 i 10");
+	}
+} while (isNaN(games) || (games < 0) || (games > 10));
+
+if (games != 0) { //vvod budget
+	do {
+		var budget = parseInt(prompt("Vash budget?"));
+		if (isNaN(budget) || (budget < 1)){
+			alert("Vvedite sum bolshe 0");
+		}
+	} while (isNaN(budget) || (budget < 1))
+}
+
+var outcome = '';
+var stavka = 0;
+var budgetArr = [];
+var itog = "Nachalnii budget: " + budget + '\n';
+
+//start of "games" games
+for (var i = 1; i <= games; i++){
+	if (budget == 0){ //esli konchilsya budget
+		alert("U vas konchilis dengi!");
+		break;
+	}
+	do {  // proverka chto stavka < budget
+		stavka = parseInt(prompt("Vasha stavka na "+ i + "yu igru, vash budget: " + budget));
+		if (stavka > budget){
+			alert("Nelzya stavit bolshe budget");
+		} 
+	} while (stavka > budget);
+
+	//start of game
+	var dealer = [getCard()];
+	var player = [getCard(), getCard()];
+	var move = '';
+
+	if (getSum(player) == 21){  //proverka black jack na razdache
+		outcome = 'win';
+		alert("BLACK JACK! " + getStatus() + " " + getMoney(stavka, outcome));
+	} else {
+		do {
+			move = prompt(getStatus() + " vvedite 1, esli nujna eshe karta");
+			if (move == '1'){
+				player.push(getCard());
+				if (getSum(player)>21){   //proverka na perebor
+					outcome = 'lose';
+					alert("Perebor T_T " + getStatus() + " " + getMoney(stavka, outcome));
+					break;
+				} else if (getSum(player) == 21){ //proverka na BLACK JACK
+					outcome = 'win';
+					alert("BLACK JACK! :P" + getStatus() + " " + getMoney(stavka, outcome));
+					break;
+				}
+			} else { //dealer plays
+				while (getSum(dealer) < 17){
+					dealer.push(getCard());
+				}
+				if (getSum(dealer) == 21){
+					outcome = 'lose';
+					alert("Dealer wins! BLACK JACK! " + getStatus() + " " + getMoney(stavka, outcome));
+				} else if ((getSum(dealer) >21) || (getSum(dealer) < getSum(player))){
+					outcome = 'win';
+					alert("YOU WIN!!! Dealer LOOSER! " + getStatus() + " " + getMoney(stavka, outcome));
+				} else if (getSum(dealer) == getSum(player)) {
+					outcome = 'draw';
+					alert("DRAW O_O " + getStatus() + " " + getMoney(stavka, outcome));
+				} else {
+					outcome = 'lose';
+					alert("You lose! Not Your time! :( " + getStatus() + " " + getMoney(stavka, outcome));
+				}
+			}
+		} while (move == '1');
+	}
+
+	itog = itog + i + 'ya igra, budget: ' + budget + "\n";
+}
+
+if (games != 0) {
+	alert("Itog po igram: \n" + itog);
+} else alert("You haven't played");
+
+</script>
